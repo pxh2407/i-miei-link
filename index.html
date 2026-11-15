@@ -107,7 +107,7 @@ function carica(){
   fetch("https://api.github.com/users/" + UTENTE + "/repos?per_page=100")
     .then(function(r){ if (!r.ok) throw r.status; return r.json(); })
     .then(function(d){
-      ELENCO = d.filter(function(r){ return r.has_pages && !r.archived && !r.private; })
+      ELENCO = d.filter(function(r){ return r.has_pages && !r.archived && !r.private && r.name != "i-miei-link"; })
                 .map(function(r){ return daNome(r.name, r.description); });
       if (!ELENCO.length) return fallback();
       mostra();
