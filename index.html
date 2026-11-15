@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>I miei link</title>
+<style>
+  :root{--carta:#f7f5f0;--bianco:#fff;--ink:#1c2430;--tenue:#4f5a68;--linea:#ddd7ca;--blu:#1f3a5f;--oro:#a87b1e;--verde:#1d7a46}
+  *{box-sizing:border-box}
+  html{font-size:22px}
+  body{margin:0;background:var(--carta);color:var(--ink);font-family:"Segoe UI",Roboto,Arial,sans-serif;line-height:1.45}
+  .testa{background:var(--blu);color:#fff;padding:14px 16px;display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+  .testa h1{margin:0;font-family:Georgia,serif;font-weight:normal;font-size:1.6rem;flex:1;min-width:180px}
+  .testa button{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.5);border-radius:8px;padding:6px 14px;font-size:1rem;cursor:pointer}
+  main{max-width:1000px;margin:0 auto;padding:0 16px 60px}
+  .cerca{width:100%;font-size:1rem;padding:12px 14px;border:2px solid var(--linea);border-radius:10px;margin:16px 0 4px;background:#fff;color:var(--ink)}
+  .conta{color:var(--tenue);font-size:.85rem;margin:4px 2px 10px}
+  h2{font-family:Georgia,serif;font-weight:normal;color:var(--blu);font-size:1.25rem;margin:26px 0 6px;border-bottom:2px solid var(--linea);padding-bottom:4px}
+  .card{background:#fff;border:1px solid var(--linea);border-left:8px solid var(--blu);border-radius:10px;padding:14px 16px;margin:10px 0}
+  .nome{font-size:1.1rem;font-weight:600;color:var(--blu);margin:0 0 2px}
+  .desc{margin:0 0 10px}
+  .bottoni{display:flex;flex-wrap:wrap;gap:8px}
+  .bottoni a,.bottoni button{display:inline-block;font-size:.95rem;font-family:inherit;padding:9px 16px;border-radius:8px;text-decoration:none;cursor:pointer}
+  .apri{background:var(--blu);color:#fff;border:2px solid var(--blu)}
+  .copia{background:#fff;color:var(--ink);border:2px solid var(--linea)}
+  .copia.ok{border-color:var(--verde);color:var(--verde)}
+  .avviso{background:#fbf3df;border-left:6px solid var(--oro);padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0;font-size:.9rem}
+  .piede{color:var(--tenue);font-size:.8rem;margin-top:30px}
+  .vuoto{color:var(--tenue);font-style:italic}
+  a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(--oro);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="testa">
+  <h1>I miei link</h1>
+  <button onclick="zoom(-1)" aria-label="Caratteri più piccoli">A−</button>
+  <button onclick="zoom(1)" aria-label="Caratteri più grandi">A+</button>
+</div>
+<main>
+  <input class="cerca" id="cerca" type="search" placeholder="🔍 Cerca…" oninput="mostra()" aria-label="Cerca un link">
+  <div class="conta" id="conta"></div>
+  <div id="msg"></div>
+  <div id="lista"></div>
+  <p class="piede">L'elenco si aggiorna da solo con i siti pubblicati su GitHub.</p>
+</main>
+
+<script>
+var UTENTE = "pxh2407";
+
+/* Descrizioni in italiano (solo siti pubblici). Gruppo: lute, attico, canzoni, video, altro */
+var SITI = {
+  "orario":                       ["lute",    "Orario delle lezioni LUTE della settimana"],
+  "corsi-lute":                   ["lute",    "Galleria dei corsi LUTE 2026-27"],
+  "iscrizione-lute":              ["lute",    "Iscrizione alla LUTE dal cellulare"],
+  "medicina-lute":                ["lute",    "Incontri di Medicina LUTE 2026-27"],
+  "mosaico-900":                  ["lute",    "Mosaico '900 – i venerdì della LUTE 2026-27"],
+  "liberi-di-scegliere":          ["lute",    "Corso «Liberi di scegliere»"],
+  "libro-lute":                   ["lute",    "LUTE · 15 anni di NOI – il libro della LUTE di Milazzo"],
+  "sostituzioni-terza-eta":       ["lute",    "Sostituzioni «Libera Università per la Terza Età» sul sito LUTE"],
+  "whatsapp-trucchi":             ["lute",    "WhatsApp: 7 trucchi che quasi nessuno conosce"],
+  "viva-la-lute-inno":            ["canzoni", "Viva la LUTE – pagina d'ingresso dell'inno"],
+  "viva-la-lute":                 ["canzoni", "Viva la LUTE – voce di Nuccio"],
+  "viva-la-lute-karaoke":         ["canzoni", "Viva la LUTE – karaoke di Nuccio"],
+  "viva-la-lute-claudio":         ["canzoni", "Viva la LUTE – voce di Claudio"],
+  "viva-la-lute-claudio-karaoke": ["canzoni", "Viva la LUTE – karaoke di Claudio"],
+  "una-mano-a-mamma":             ["canzoni", "Canzone «Una mano a mamma»"],
+  "claudia-lo-sa":                ["canzoni", "Canzone «Claudia lo sa»"],
+  "inno-lute":                    ["canzoni", "Vecchio inno della LUTE (karaoke)"],
+  "video-corsi-lute":             ["video",   "Video: inizio dei corsi LUTE 2026-27"],
+  "video-ancora-in-tempo-lute":   ["video",   "Video «Sei ancora in tempo»"],
+  "video-curiosita-lute":         ["video",   "Video «La curiosità non va in pensione»"],
+  "video-medicina-lute":          ["video",   "Video degli Incontri di Medicina"],
+  "video-venerdi-lute":           ["video",   "Video dei Venerdì LUTE (Mosaico '900)"],
+  "video-ia-spadafora":           ["video",   "Video: invito all'incontro sull'IA (Spadafora)"],
+  "panoramicpenthouse_info":      ["attico",  "Guida per gli ospiti dell'Attico (link dei QR code)"],
+  "attico-nuovo":                 ["attico",  "Anteprima del sito nuovo dell'Attico"],
+  "attico-guida-ospiti":          ["attico",  "Prova della guida ospiti (superata)"],
+  "ricevuta-locazione":           ["attico",  "Ricevuta di locazione"],
+  "Erasmus":                      ["altro",   "Sito del progetto Erasmus"],
+  "corso-segreteria":             ["altro",   "Dispensa del corso di segreteria (Principato Stefania)"],
+  "corso-gianna":                 ["altro",   "Dispensa del corso di tecnica commerciale (Lamancusa Gianna)"],
+  "uomo-e-malattia":              ["altro",   "L'uomo e la malattia – presentazione a slide (FIDAPA)"],
+  "worldatlas":                   ["altro",   "Atlante del mondo interattivo"],
+  "siamotuttieuropei":            ["altro",   "Gioco «Siamo Tutti Europei»"],
+  "appuntamenti":                 ["altro",   "App «I miei appuntamenti»"]
+};
+var GRUPPI = [["lute","LUTE"],["video","Video"],["canzoni","Canzoni"],["attico","Attico"],["altro","Altro"]];
+
+var ELENCO = [];
+
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s == null ? "" : s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function link(nome){ return "https://" + UTENTE + ".github.io/" + nome + "/"; }
+
+function daNome(nome, descGitHub){
+  var s = SITI[nome];
+  return { nome: nome, gruppo: s ? s[0] : "altro", desc: s ? s[1] : (descGitHub || nome) };
+}
+
+function carica(){
+  var fallback = function(msg){
+    ELENCO = Object.keys(SITI).map(function(n){ return daNome(n); });
+    if (msg) $("msg").innerHTML = '<div class="avviso">' + msg + '</div>';
+    mostra();
+  };
+  fetch("https://api.github.com/users/" + UTENTE + "/repos?per_page=100")
+    .then(function(r){ if (!r.ok) throw r.status; return r.json(); })
+    .then(function(d){
+      ELENCO = d.filter(function(r){ return r.has_pages && !r.archived && !r.private; })
+                .map(function(r){ return daNome(r.name, r.description); });
+      if (!ELENCO.length) return fallback();
+      mostra();
+    })
+    .catch(function(){ fallback("Non riesco a controllare GitHub in questo momento: mostro l'elenco salvato."); });
+}
+
+function mostra(){
+  var q = $("cerca").value.trim().toLowerCase(), html = "", tot = 0;
+  GRUPPI.forEach(function(g){
+    var voci = ELENCO.filter(function(s){
+      return s.gruppo == g[0] && (!q || (s.nome + " " + s.desc).toLowerCase().indexOf(q) >= 0);
+    }).sort(function(a,b){ return a.desc.localeCompare(b.desc, "it"); });
+    if (!voci.length) return;
+    tot += voci.length;
+    html += "<h2>" + g[1] + "</h2>";
+    voci.forEach(function(s){
+      html += '<div class="card"><p class="nome">' + esc(s.desc) + '</p>' +
+        '<div class="bottoni"><a class="apri" href="' + esc(link(s.nome)) + '" target="_blank" rel="noopener">Apri ↗</a>' +
+        '<button class="copia" onclick="copia(this,\'' + esc(s.nome) + '\')">Copia il link</button></div></div>';
+    });
+  });
+  $("lista").innerHTML = html || '<p class="vuoto">Nessun link trovato.</p>';
+  $("conta").textContent = tot + (tot == 1 ? " link" : " link");
+}
+
+function copia(btn, nome){
+  var u = link(nome);
+  var fatto = function(){ btn.textContent = "✓ Copiato"; btn.classList.add("ok");
+    setTimeout(function(){ btn.textContent = "Copia il link"; btn.classList.remove("ok"); }, 2000); };
+  if (navigator.clipboard) navigator.clipboard.writeText(u).then(fatto, function(){ prompt("Copia il link:", u); });
+  else prompt("Copia il link:", u);
+}
+
+var Z = 22;
+try { Z = parseInt(localStorage.getItem("link-zoom"), 10) || 22; } catch(e){}
+function zoom(d){
+  Z = Math.max(16, Math.min(34, Z + d * 2));
+  document.documentElement.style.fontSize = Z + "px";
+  try { localStorage.setItem("link-zoom", Z); } catch(e){}
+}
+zoom(0);
+carica();
+</script>
+</body>
+</html>
